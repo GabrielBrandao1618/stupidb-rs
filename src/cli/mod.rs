@@ -6,10 +6,11 @@ pub enum Command {
         name: String,
         age: u16,
     },
+    List,
 }
 
 #[derive(Parser)]
 pub struct Cli {
     #[command(subcommand)]
-    command: Command,
+    pub command: Command,
 }
