@@ -13,7 +13,9 @@ pub enum Command {
         name: String,
         age: u16,
     },
-    List,
+    List {
+        quantity: u8,
+    },
     Remove {
         #[command(subcommand)]
         param: RemoveParam,

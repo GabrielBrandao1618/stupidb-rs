@@ -18,7 +18,7 @@ fn main() {
             let person = create_person(name, age); 
             println!("Created person with name {}, age {}, and id {}", person.name, person.age, person.id);
         },
-        Command::List => {
+        Command::List {quantity} => {
             let result = list_all();
             for person in result {
                 println!("{}: name: {}, age: {}", person.id, person.name, person.age);
