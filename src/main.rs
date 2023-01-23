@@ -4,10 +4,12 @@ mod model;
 mod cli;
 mod store;
 mod select;
+mod mutate;
 
-use cli::{Cli,Command};
+use cli::{Cli,Command,RemoveParam};
 use store::create_person;
 use select::list_all;
+use mutate::remove_by_key;
 
 fn main() {
     let args = Cli::parse();
@@ -20,6 +22,14 @@ fn main() {
             let result = list_all();
             for person in result {
                 println!("{}: name: {}, age: {}", person.id, person.name, person.age);
+            }
+        },
+        Command::Remove { param } => {
+            match param {
+                RemoveParam::Id { val } => {
+                    remove_by_key(&val);
+                    println!("Removed user with id {val}");
+                },
             }
         }
     }
