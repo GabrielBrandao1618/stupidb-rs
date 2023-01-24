@@ -14,7 +14,8 @@ pub enum Command {
         age: u16,
     },
     List {
-        quantity: u8,
+        #[arg(long, default_value_t = 50)]
+        amount: u8,
         #[arg(long)]
         min_age: Option<u16>,
         #[arg(long)]
