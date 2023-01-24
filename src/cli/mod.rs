@@ -31,7 +31,9 @@ pub enum Command {
     #[clap(about="Get a record given a key")]
     Get {
         key: String,
-    }
+    },
+    #[clap(about="Clear all data, erasing all records")]
+    Clear
 }
 
 #[derive(Subcommand)]

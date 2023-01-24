@@ -7,7 +7,7 @@ mod store;
 use cli::{Cli,Command,RemoveParam};
 use store::insert::create_person;
 use store::select::{list,get_by_key};
-use store::mutate::remove_by_key;
+use store::mutate::{remove_by_key,clear};
 
 fn main() {
     let args = Cli::parse();
@@ -41,6 +41,10 @@ fn main() {
         Command::Get { key } => {
             let person = get_by_key(&key).expect("Record not found with the given key");
             println!("{}: name: {}, age: {}", person.id, person.name, person.age);
-        }
+        },
+        Command::Clear => {
+           clear(); 
+           println!("Removed all records");
+        },
     }
 }
