@@ -27,3 +27,15 @@ pub fn list(quantity: usize) -> Vec<Person> {
     }).take(quantity).collect();
     result
 }
+
+pub fn get_by_key(key: &str) -> Option<Person>{
+    let mut str_path = BASE_PATH.to_owned();
+    str_path.push_str(key);
+    let path = Path::new(&str_path);
+    if path.exists() {
+        let file = fs::File::open(path).unwrap();
+        let decoded: Person = rmps::from_read(file).unwrap();
+        return Some(decoded);
+    }
+    None
+}

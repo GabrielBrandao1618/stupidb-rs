@@ -20,6 +20,9 @@ pub enum Command {
         #[command(subcommand)]
         param: RemoveParam,
     },
+    Get {
+        key: String,
+    }
 }
 
 #[derive(Parser)]

@@ -8,7 +8,7 @@ mod mutate;
 
 use cli::{Cli,Command,RemoveParam};
 use store::create_person;
-use select::{list};
+use select::{list,get_by_key};
 use mutate::remove_by_key;
 
 fn main() {
@@ -31,6 +31,10 @@ fn main() {
                     println!("Removed user with id {val}");
                 },
             }
+        },
+        Command::Get { key } => {
+            let person = get_by_key(&key).expect("Record not found with the given key");
+            println!("{}: name: {}, age: {}", person.id, person.name, person.age);
         }
     }
 }
