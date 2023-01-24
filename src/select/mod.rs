@@ -15,16 +15,27 @@ fn get_dir_files() -> Option<ReadDir> {
     None
 }
 
-pub fn list(quantity: usize) -> Vec<Person> {
+pub fn list(quantity: usize, min_age: Option<u16>, max_age: Option<u16>) -> Vec<Person> {
     let files = get_dir_files().unwrap();
 
-    let result: Vec<Person> = files.map(|file_path| {
+    let mut result: Vec<Person> = files.map(|file_path| {
         let entry = file_path.unwrap();
         let path = entry.path();
         let file = fs::File::open(path).unwrap();
         let decoded: Person = rmps::from_read(file).unwrap();
         decoded
     }).take(quantity).collect();
+    if min_age != None || max_age != None {
+        result = result.into_iter().filter(|record| {
+            if min_age != None && record.age < min_age.unwrap() {
+                return false;
+            }
+            if max_age != None && record.age > max_age.unwrap() {
+                return false;
+            }
+            return true;
+        }).collect();
+    }
     result
 }
 

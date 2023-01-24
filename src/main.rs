@@ -18,8 +18,12 @@ fn main() {
             let person = create_person(name, age); 
             println!("Created person with name {}, age {}, and id {}", person.name, person.age, person.id);
         },
-        Command::List {quantity} => {
-            let result = list(usize::from(quantity));
+        Command::List {quantity, minage, maxage} => {
+            let result = list(
+                usize::from(quantity), 
+                minage, 
+                maxage
+            );
             for person in result {
                 println!("{}: name: {}, age: {}", person.id, person.name, person.age);
             }

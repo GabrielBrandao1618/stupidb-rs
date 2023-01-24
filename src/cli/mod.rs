@@ -15,6 +15,10 @@ pub enum Command {
     },
     List {
         quantity: u8,
+        #[arg(long)]
+        minage: Option<u16>,
+        #[arg(long)]
+        maxage: Option<u16>,
     },
     Remove {
         #[command(subcommand)]
