@@ -2,12 +2,12 @@ use clap::Parser;
 
 mod model;
 mod cli;
-mod store;
+mod storage;
 
 use cli::{Cli,Command,RemoveParam};
-use store::insert::create_person;
-use store::select::{list,get_by_key};
-use store::mutate::{remove_by_key,clear};
+use storage::insert::create_person;
+use storage::select::{list,get_by_key};
+use storage::mutate::{remove_by_key,clear};
 
 fn main() {
     let args = Cli::parse();
