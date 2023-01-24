@@ -8,7 +8,7 @@ mod mutate;
 
 use cli::{Cli,Command,RemoveParam};
 use store::create_person;
-use select::list_all;
+use select::{list};
 use mutate::remove_by_key;
 
 fn main() {
@@ -19,7 +19,7 @@ fn main() {
             println!("Created person with name {}, age {}, and id {}", person.name, person.age, person.id);
         },
         Command::List {quantity} => {
-            let result = list_all();
+            let result = list(usize::from(quantity));
             for person in result {
                 println!("{}: name: {}, age: {}", person.id, person.name, person.age);
             }

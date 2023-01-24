@@ -15,19 +15,6 @@ fn get_dir_files() -> Option<ReadDir> {
     None
 }
 
-pub fn list_all() -> Vec<Person> {
-    let files = get_dir_files().unwrap();
-
-    let result: Vec<Person> = files.map(|file_path| {
-        let entry = file_path.unwrap();
-        let path = entry.path();
-        let file = fs::File::open(path).unwrap();
-        let decoded: Person = rmps::from_read(file).unwrap();
-        decoded
-    }).collect();
-    result
-}
-
 pub fn list(quantity: usize) -> Vec<Person> {
     let files = get_dir_files().unwrap();
 
