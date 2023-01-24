@@ -3,13 +3,11 @@ use clap::Parser;
 mod model;
 mod cli;
 mod store;
-mod select;
-mod mutate;
 
 use cli::{Cli,Command,RemoveParam};
-use store::create_person;
-use select::{list,get_by_key};
-use mutate::remove_by_key;
+use store::insert::create_person;
+use store::select::{list,get_by_key};
+use store::mutate::remove_by_key;
 
 fn main() {
     let args = Cli::parse();
@@ -24,6 +22,10 @@ fn main() {
                 min_age, 
                 max_age
             );
+            if result.len() == 0 {
+                println!("No record found");
+                return;
+            }
             for person in result {
                 println!("{}: name: {}, age: {}", person.id, person.name, person.age);
             }
