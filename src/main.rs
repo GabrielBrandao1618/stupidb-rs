@@ -18,9 +18,9 @@ fn main() {
             let person = create_person(name, age); 
             println!("Created person with name {}, age {}, and id {}", person.name, person.age, person.id);
         },
-        Command::List {amount, min_age, max_age} => {
+        Command::List {limit, min_age, max_age} => {
             let result = list(
-                usize::from(amount), 
+                usize::from(limit), 
                 min_age, 
                 max_age
             );
