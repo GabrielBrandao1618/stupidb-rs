@@ -56,7 +56,7 @@ Dessa forma, o registro com o id acima será removido
 
 ### Clear
 
-Limpa todos os dados e apaga completamente a pasta `.data`. Não requer nenhum paâmetro, então é tão simples como:
+Limpa todos os dados e apaga completamente a pasta `.data`. Não requer nenhum parâmetro, então é tão simples como:
 ```bash
 ./stupidb-rs clear
 ```
