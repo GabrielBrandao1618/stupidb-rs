@@ -1,3 +1,4 @@
+alpha = _{ 'a'..'z' | 'A'..'Z' }
 comparator = _{ equals | greater | minor }
 equals = { " = " }
 greater = { " > " }
@@ -7,7 +8,7 @@ operator = _{ and | or }
 and = { "and" }
 or = { "or" }
 
-string = !{ ASCII_DIGIT* }
+string = { (alpha | ASCII_DIGIT)+ }
 
 condition = @{ string ~ comparator ~ string }
 
