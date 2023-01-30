@@ -1,4 +1,4 @@
-string = { (ASCII_ALPHANUMERIC)+ }
+string = @{ (ASCII_ALPHANUMERIC)+ }
 int = { ASCII_DIGIT+ }
 
 comparator = { equals | greater | minor }
@@ -12,7 +12,7 @@ or = { "or" }
 
 condition = { string ~ comparator ~ string }
 
-where = { "where" ~ (condition ~ operator?)+ }
+where = { "where" ~ condition ~ (operator ~ condition)* }
 
 insertParam = {string ~ "=" ~ string }
 
