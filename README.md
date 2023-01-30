@@ -60,3 +60,18 @@ Limpa todos os dados e apaga completamente a pasta `.data`. Não requer nenhum p
 ```bash
 ./stupidb-rs clear
 ```
+
+## WIP - query language
+
+Criar novo registro
+```bash
+insert Gabriel 18
+```
+Deletar registro
+```
+delete where id = '...'
+```
+Listar registros
+```bash
+select where id = '...'
+```

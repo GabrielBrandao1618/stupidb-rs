@@ -1,8 +1,11 @@
+#[macro_use] extern crate pest;
+
 use clap::Parser;
 
 mod model;
 mod cli;
 mod storage;
+mod query;
 
 use cli::{Cli,Command,RemoveParam};
 use storage::insert::create_person;

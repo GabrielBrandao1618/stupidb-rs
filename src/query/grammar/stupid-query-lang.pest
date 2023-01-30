@@ -1,0 +1,20 @@
+comparator = _{ equals | greater | minor }
+equals = { " = " }
+greater = { " > " }
+minor = { " < " }
+
+operator = _{ and | or }
+and = { "and" }
+or = { "or" }
+
+string = !{ ASCII_DIGIT* }
+
+condition = @{ string ~ comparator ~ string }
+
+where = { "where" ~ (condition ~ operator?)+ }
+
+action = @{ "insert" | "delete" | "select" }
+
+stmt = _{ SOI ~ action ~ where? ~ EOI }
+
+WHITESPACE = _{ " " | "\t" }
