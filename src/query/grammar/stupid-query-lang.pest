@@ -1,21 +1,26 @@
-alpha = _{ 'a'..'z' | 'A'..'Z' }
-comparator = _{ equals | greater | minor }
-equals = { " = " }
-greater = { " > " }
-minor = { " < " }
+string = { (ASCII_ALPHANUMERIC)+ }
+int = { ASCII_DIGIT+ }
 
-operator = _{ and | or }
+comparator = { equals | greater | minor }
+equals = { "=" }
+greater = { ">" }
+minor = { "<" }
+
+operator = { and | or }
 and = { "and" }
 or = { "or" }
 
-string = { (alpha | ASCII_DIGIT)+ }
-
-condition = @{ string ~ comparator ~ string }
+condition = { string ~ comparator ~ string }
 
 where = { "where" ~ (condition ~ operator?)+ }
 
-action = @{ "insert" | "delete" | "select" }
+insertParam = {string ~ "=" ~ string }
 
-stmt = _{ SOI ~ action ~ where? ~ EOI }
+action = { insert | delete | select }
+insert = { "insert" ~ insertParam ~ ("," ~ insertParam)+}
+delete = { "delete" ~ where? }
+select = { "select" ~  where? }
+
+stmt = { SOI ~ action ~ EOI }
 
 WHITESPACE = _{ " " | "\t" }
