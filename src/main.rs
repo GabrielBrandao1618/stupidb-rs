@@ -1,9 +1,10 @@
-#[macro_use] extern crate pest;
+#[macro_use]
+extern crate pest;
 
-mod model;
 mod cli;
-mod storage;
+mod model;
 mod query;
+mod storage;
 
 use query::parser::parse;
 

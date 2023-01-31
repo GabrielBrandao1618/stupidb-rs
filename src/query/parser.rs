@@ -36,10 +36,14 @@ pub fn parse(input: &str) -> ActionResult {
     };
 }
 
+fn extract_conditions_from_action(action: Pair<Rule>) -> Pairs<Rule> {
+    action.into_inner().next().unwrap().into_inner()
+}
+
 pub fn perform_action(action: Pair<Rule>) -> ActionResult {
     match action.as_rule() {
         Rule::select => {
-            let conditions = action.into_inner().next().unwrap().into_inner();
+            let conditions = extract_conditions_from_action(action);
             let query_result: Vec<Person> = select::list(50)
                 .into_iter()
                 .filter(|register| satisfies_where(conditions.clone(), &register))
@@ -94,17 +98,27 @@ fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
     return result;
 }
 fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
-    let comparision_vec: Vec<Pair<Rule>> = comparision.into_inner().collect();
-    let operator = comparision_vec[1]
+    let comparision_inner = comparision.into_inner();
+    let operator = comparision_inner
+        .clone()
+        .nth(1)
+        .unwrap()
         .clone()
         .into_inner()
         .next()
         .unwrap()
         .as_rule();
 
-    let value = comparision_vec[2].clone().into_inner().next().unwrap();
+    let value = comparision_inner
+        .clone()
+        .nth(2)
+        .unwrap()
+        .clone()
+        .into_inner()
+        .next()
+        .unwrap();
     // Attribute is the person attribute. example: age or name
-    let attribute = comparision_vec[0].clone().as_str();
+    let attribute = comparision_inner.clone().nth(0).unwrap().clone().as_str();
     match attribute {
         "age" => match value.as_rule() {
             Rule::int => {
