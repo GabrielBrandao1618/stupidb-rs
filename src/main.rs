@@ -8,7 +8,5 @@ mod query;
 use query::parser::parse;
 
 fn main() {
-    parse("select where name = Gabriel and age > 18");    
-    parse("delete where name = Gabriel");    
-    parse("insert name = Gabriel, age = 18");    
+    parse("select where age > 18 and name = Gabriel");    
 }

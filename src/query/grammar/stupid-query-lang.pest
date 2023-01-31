@@ -10,9 +10,11 @@ operator = { and | or }
 and = { "and" }
 or = { "or" }
 
-condition = { string ~ comparator ~ string }
+value = {int | string}
+comparision = { string ~ comparator ~ value }
+comparisionSegment = {operator ~ comparision}
 
-where = { "where" ~ condition ~ (operator ~ condition)* }
+where = { "where" ~ comparision ~ comparisionSegment* }
 
 insertParam = {string ~ "=" ~ string }
 
