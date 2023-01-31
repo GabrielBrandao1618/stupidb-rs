@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use pest::{iterators::Pair, iterators::Pairs, Parser};
 
 use crate::model::Person;
@@ -35,7 +33,8 @@ pub fn perform_action(action: Pair<Rule>) {
             let conditions = action.into_inner().next().unwrap().into_inner();
 
             let p1 = Person::new("Gabriel".to_owned(), 18);
-            satisfies_where(conditions, &p1);
+            let is_true = satisfies_where(conditions, &p1);
+            println!("{is_true}");
         }
         Rule::insert => println!("Performing a insert"),
         Rule::delete => println!("Performing a delete"),
@@ -48,15 +47,30 @@ fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
     for condition in conditions {
         match condition.as_rule() {
             Rule::comparision => {
-                resolve_comparision(condition, person);
+                result = resolve_comparision(condition, person);
             }
-            Rule::comparisionSegment => println!("Comparision segment"),
+            Rule::comparisionSegment => {
+                let condition_vec = condition.into_inner();
+                // First element is the operator(and/or) and second element is the comparision
+                // itself
+                let condition_val = condition_vec.clone().nth(1).unwrap();
+                let operator = condition_vec.clone().nth(0).unwrap().into_inner().next().unwrap();
+                match operator.as_rule() {
+                    Rule::or => {
+                        result = result || resolve_comparision(condition_val, person);
+                    },
+                    Rule::and => {
+                        result = result && resolve_comparision(condition_val, person);
+                    },
+                    _ => println!("Unknown operator: {:#?}", operator.as_rule()),
+                }
+            },
             _ => unreachable!(),
         }
     }
     return result;
 }
-fn resolve_comparision<V>(comparision: Pair<Rule>, base_value: V) -> bool {
+fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
     let comparision_vec: Vec<Pair<Rule>> = comparision.into_inner().collect();
     let operator = comparision_vec[1]
         .clone()
@@ -65,31 +79,52 @@ fn resolve_comparision<V>(comparision: Pair<Rule>, base_value: V) -> bool {
         .unwrap()
         .as_rule();
 
-    let attribute = comparision_vec[0].clone();
-    
     let value = comparision_vec[2].clone().into_inner().next().unwrap();
-    match value.as_rule() {
-        Rule::int => {
-            let parsed_value: u32 = value.as_str().parse::<u32>().unwrap();
-            println!("It is int, {}", parsed_value);
-            return parsed_value == base_value;
+    // Attribute is the person attribute. example: age or name
+    let attribute = comparision_vec[0].clone().as_str();
+    match attribute {
+        "age" => match value.as_rule() {
+            Rule::int => {
+                let parsed_value: u32 = value.as_str().parse::<u32>().unwrap();
+                return compare_by_operator(operator, base_value.age as u32, parsed_value);
+            }
+            Rule::string => println!("Invalid age argument: it must be a integral"),
+            _ => unreachable!(),
+        },
+        "name" => {
+            match value.as_rule() {
+                Rule::string => {
+                    let compare_value = base_value.name.to_owned();
+                    return compare_by_operator(operator, compare_value, value.as_str().to_owned());
+                },
+                _ => unreachable!(),
+            }
+        },
+        "id" => match value.as_rule() {
+            Rule::int => println!("Id must me uuid string"),
+            Rule::string => {
+                let compare_value = base_value.id.to_owned();
+                return compare_by_operator(operator, compare_value, value.as_str().to_owned());
+            },
+            _ => unreachable!(),
         }
-        Rule::string => println!("It is string"),
-        _ => unreachable!(),
+        _ => println!("Unknown attribute"),
     }
-    println!("{:#?}", value);
 
+    return false;
+}
+
+fn compare_by_operator<V: Ord>(operator: Rule, a: V, b: V) -> bool {
     match operator {
         Rule::equals => {
-            println!("Checking if is equals");
+            return a == b;
         }
         Rule::minor => {
-            println!("Checking if is minor");
+            return a < b;
         }
         Rule::greater => {
-            println!("Checking if is greater");
+            return a > b;
         }
         _ => unreachable!(),
     }
-    return false;
 }
