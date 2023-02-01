@@ -9,7 +9,7 @@ mod storage;
 use query::parser::parse;
 
 fn main() {
-    let result = parse("select limit 1");
+    let result = parse("select limit 2");
     for row in result.rows {
         println!("{}: name: {}, age: {}", row.id, row.name, row.age);
     }

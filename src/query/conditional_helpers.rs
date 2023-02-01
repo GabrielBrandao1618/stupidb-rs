@@ -5,7 +5,12 @@ use pest::{iterators::Pair, iterators::Pairs};
 
 pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
     match action.into_inner().next() {
-        Some(inner) => return Some(inner.into_inner()),
+        Some(inner) => {
+            if inner.as_rule() != Rule::comparisionSegment && inner.as_rule() != Rule::comparision {
+                return None;
+            }
+            return Some(inner.into_inner());
+        },
         None => return None,
     }
 }
@@ -28,7 +33,7 @@ pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     limit
 }
 
-pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
+pub fn satisfies_where(conditions: &mut Pairs<Rule>, person: &Person) -> bool {
     let mut result = false;
     for condition in conditions {
         match condition.as_rule() {
@@ -88,7 +93,7 @@ fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
         "age" => match value.as_rule() {
             Rule::int => {
                 let parsed_value: u32 = value.as_str().parse::<u32>().unwrap();
-                return compare_by_operator(operator, base_value.age as u32, parsed_value);
+                return compare_by_operator(&operator, base_value.age as u32, parsed_value);
             }
             Rule::string => println!("Invalid age argument: it must be a integral"),
             _ => unreachable!(),
@@ -96,7 +101,7 @@ fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
         "name" => match value.as_rule() {
             Rule::string => {
                 let compare_value = base_value.name.to_owned();
-                return compare_by_operator(operator, compare_value, value.as_str().to_owned());
+                return compare_by_operator(&operator, compare_value, value.as_str().to_owned());
             }
             _ => unreachable!(),
         },
@@ -104,7 +109,7 @@ fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
             Rule::int => println!("Id must me uuid string"),
             Rule::string => {
                 let compare_value = base_value.id.to_owned();
-                return compare_by_operator(operator, compare_value, value.as_str().to_owned());
+                return compare_by_operator(&operator, compare_value, value.as_str().to_owned());
             }
             _ => unreachable!(),
         },
@@ -114,7 +119,7 @@ fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
     return false;
 }
 
-fn compare_by_operator<V: Ord>(operator: Rule, a: V, b: V) -> bool {
+fn compare_by_operator<V: Ord>(operator: &Rule, a: V, b: V) -> bool {
     match operator {
         Rule::equals => {
             return a == b;
