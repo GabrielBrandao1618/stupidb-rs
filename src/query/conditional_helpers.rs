@@ -4,15 +4,12 @@ use crate::model::Person;
 use pest::{iterators::Pair, iterators::Pairs};
 
 pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
-    match action.into_inner().next() {
-        Some(inner) => {
-            if inner.as_rule() != Rule::whereStmt {
-                return None;
-            }
-            return Some(inner.into_inner());
+    for stmt in action.into_inner() {
+        if stmt.as_rule() == Rule::whereStmt {
+            return Some(stmt.into_inner());
         }
-        None => return None,
     }
+    None
 }
 
 pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
