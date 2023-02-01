@@ -15,14 +15,14 @@ comparision = { string ~ comparator ~ value }
 comparisionSegment = {operator ~ comparision}
 limitStmt = { "limit" ~ int }
 
-where = { "where" ~ comparision ~ comparisionSegment* }
+whereStmt = { "where" ~ comparision ~ comparisionSegment* }
 
 insertParam = {string ~ "=" ~ string }
 
 action = { insert | delete | select }
 insert = { "insert" ~ insertParam ~ ("," ~ insertParam)+}
-delete = { "delete" ~ where? }
-select = { "select" ~  where? ~ limitStmt? }
+delete = { "delete" ~ whereStmt? }
+select = { "select" ~  whereStmt? ~ limitStmt? }
 
 stmt = { SOI ~ action ~ EOI }
 

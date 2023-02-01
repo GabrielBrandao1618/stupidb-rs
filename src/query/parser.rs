@@ -46,15 +46,17 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
             let limit = extract_limit_from_action(&action);
             let mut query_result: Vec<Person> = select::list(limit as usize);
             match conditions {
-                Some(mut unwraped) => {
+                Some(unwraped) => {
                     query_result = query_result
                         .into_iter()
-                        .filter(|row| satisfies_where(&mut unwraped, &row))
+                        .filter(|row| {
+                            return satisfies_where(unwraped.clone(), row);
+                        })
                         .collect()
                 }
                 None => (),
             }
-            let output = ActionResult{
+            let output = ActionResult {
                 msg: "Selected all people within the filter".to_owned(),
                 rows: query_result,
             };

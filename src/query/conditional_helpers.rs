@@ -6,17 +6,21 @@ use pest::{iterators::Pair, iterators::Pairs};
 pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
     match action.into_inner().next() {
         Some(inner) => {
-            if inner.as_rule() != Rule::comparisionSegment && inner.as_rule() != Rule::comparision {
+            if inner.as_rule() != Rule::whereStmt {
                 return None;
             }
             return Some(inner.into_inner());
-        },
+        }
         None => return None,
     }
 }
 
 pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     let mut limit = 50;
+
+    if action.as_rule() != Rule::limitStmt {
+        return limit;
+    }
 
     match action.clone().into_inner().next() {
         Some(lim) => {
@@ -33,12 +37,13 @@ pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     limit
 }
 
-pub fn satisfies_where(conditions: &mut Pairs<Rule>, person: &Person) -> bool {
+pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
     let mut result = false;
     for condition in conditions {
         match condition.as_rule() {
             Rule::comparision => {
-                result = resolve_comparision(condition, person);
+                let comparision_result = resolve_comparision(condition, person);
+                result = comparision_result;
             }
             Rule::comparisionSegment => {
                 let condition_vec = condition.into_inner();
@@ -52,17 +57,22 @@ pub fn satisfies_where(conditions: &mut Pairs<Rule>, person: &Person) -> bool {
                     .into_inner()
                     .next()
                     .unwrap();
+
+                let comparision_result = resolve_comparision(condition_val, person);
                 match operator.as_rule() {
                     Rule::or => {
-                        result = result || resolve_comparision(condition_val, person);
+                        result = result || comparision_result;
                     }
                     Rule::and => {
-                        result = result && resolve_comparision(condition_val, person);
+                        result = result && comparision_result;
                     }
                     _ => println!("Unknown operator: {:#?}", operator.as_rule()),
                 }
             }
-            _ => return true,
+            _ => {
+                println!("Unknown comparision operator {:#?}", condition.as_rule());
+                return true;
+            }
         }
     }
     return result;
