@@ -13,21 +13,12 @@ pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>>
 }
 
 pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
-    let mut limit = 50;
-
-    let limit_stmt = action.clone().into_inner().nth(1).unwrap();
-
-    if limit_stmt.as_rule() != Rule::limitStmt {
-        return limit;
-    }
-
-    match limit_stmt.clone().into_inner().next() {
-        Some(lim) => {
-            limit = lim.as_str().parse::<u32>().unwrap();
+    for pair in action.clone().into_inner() {
+        if pair.as_rule() == Rule::limitStmt {
+            return pair.into_inner().next().unwrap().as_str().parse::<u32>().unwrap();
         }
-        None => (),
-    };
-    limit
+    }
+    return 50;
 }
 
 pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
