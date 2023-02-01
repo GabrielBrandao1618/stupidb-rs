@@ -1,16 +1,7 @@
-use super::parser::Rule;
+use super::{extract_from_pair, Rule};
 
 use crate::model::Person;
 use pest::{iterators::Pair, iterators::Pairs};
-
-fn extract_from_pair(rule: Rule, pair: Pair<Rule>) -> Option<Pair<Rule>> {
-    for item in pair.into_inner() {
-        if item.as_rule() == rule {
-            return Some(item);
-        }
-    }
-    return None;
-}
 
 pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
     let where_stmt = extract_from_pair(Rule::whereStmt, action);
@@ -90,7 +81,9 @@ fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
         .next()
         .unwrap();
     // Attribute is the person attribute. example: age or name
-    let attribute = extract_from_pair(Rule::string, comparision).unwrap().as_str();
+    let attribute = extract_from_pair(Rule::string, comparision)
+        .unwrap()
+        .as_str();
     match attribute {
         "age" => match value.as_rule() {
             Rule::int => {

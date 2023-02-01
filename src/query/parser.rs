@@ -1,14 +1,12 @@
+use super::{Rule, StupidQueryLangParser,insert_helpers::extract_insert_params};
+
 use pest::{iterators::Pair, Parser};
 
 use crate::model::Person;
 use crate::query::conditional_helpers::{
     extract_conditions_from_action, extract_limit_from_action, satisfies_where,
 };
-use crate::storage::select;
-
-#[derive(pest_derive::Parser)]
-#[grammar = "query/grammar/stupid-query-lang.pest"]
-pub struct StupidQueryLangParser;
+use crate::storage::{insert, select};
 
 pub struct ActionResult {
     pub rows: Vec<Person>,
@@ -62,7 +60,10 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
             };
             return output;
         }
-        Rule::insert => println!("Performing a insert"),
+        Rule::insert => {
+            let (name, age) = extract_insert_params(action);
+            insert::create_person(name, age as u16);
+        }
         Rule::delete => println!("Performing a delete"),
         _ => unreachable!(),
     }

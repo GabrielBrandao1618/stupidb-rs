@@ -6,11 +6,15 @@ mod model;
 mod query;
 mod storage;
 
+use clap::Parser;
 use query::parser::parse;
+use cli::Cli;
 
 fn main() {
-    let result = parse("select where age > 12 limit 1");
+    let args = Cli::parse();
+    let result = parse(&args.command);
+
     for row in result.rows {
-        println!("{}: name: {}, age: {}", row.id, row.name, row.age);
+        println!("{}", row.name);
     }
 }

@@ -33,7 +33,6 @@ pub fn list(quantity: usize) -> Vec<Person> {
                 })
                 .take(quantity)
                 .collect();
-
             return result;
         }
     }

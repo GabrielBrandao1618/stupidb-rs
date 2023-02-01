@@ -17,7 +17,7 @@ limitStmt = { "limit" ~ int }
 
 whereStmt = { "where" ~ comparision ~ comparisionSegment* }
 
-insertParam = {string ~ "=" ~ string }
+insertParam = {string ~ "=" ~ value }
 
 action = { insert | delete | select }
 insert = { "insert" ~ insertParam ~ ("," ~ insertParam)+}
