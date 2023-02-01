@@ -3,8 +3,29 @@ use super::parser::Rule;
 use crate::model::Person;
 use pest::{iterators::Pair, iterators::Pairs};
 
-pub fn extract_conditions_from_action(action: Pair<Rule>) -> Pairs<Rule> {
-    action.into_inner().next().unwrap().into_inner()
+pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
+    match action.into_inner().next() {
+        Some(inner) => return Some(inner.into_inner()),
+        None => return None,
+    }
+}
+
+pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
+    let mut limit = 50;
+
+    match action.clone().into_inner().next() {
+        Some(lim) => {
+            limit = lim
+                .into_inner()
+                .next()
+                .unwrap()
+                .as_str()
+                .parse::<u32>()
+                .unwrap();
+        }
+        None => (),
+    };
+    limit
 }
 
 pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
@@ -36,7 +57,7 @@ pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
                     _ => println!("Unknown operator: {:#?}", operator.as_rule()),
                 }
             }
-            _ => unreachable!(),
+            _ => return true,
         }
     }
     return result;

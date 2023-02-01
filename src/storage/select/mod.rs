@@ -23,7 +23,7 @@ pub fn list(quantity: usize) -> Vec<Person> {
             return vec![];
         }
         Some(files) => {
-            let mut result: Vec<Person> = files
+            let result: Vec<Person> = files
                 .map(|file_path| {
                     let entry = file_path.unwrap();
                     let path = entry.path();

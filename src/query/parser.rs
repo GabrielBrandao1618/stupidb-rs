@@ -1,8 +1,10 @@
 use pest::{iterators::Pair, Parser};
 
 use crate::model::Person;
+use crate::query::conditional_helpers::{
+    extract_conditions_from_action, extract_limit_from_action, satisfies_where,
+};
 use crate::storage::select;
-use crate::query::conditional_helpers::{extract_conditions_from_action,satisfies_where};
 
 #[derive(pest_derive::Parser)]
 #[grammar = "query/grammar/stupid-query-lang.pest"]
@@ -40,11 +42,18 @@ pub fn parse(input: &str) -> ActionResult {
 pub fn perform_action(action: Pair<Rule>) -> ActionResult {
     match action.as_rule() {
         Rule::select => {
-            let conditions = extract_conditions_from_action(action);
-            let query_result: Vec<Person> = select::list(50)
-                .into_iter()
-                .filter(|register| satisfies_where(conditions.clone(), &register))
-                .collect();
+            let conditions = extract_conditions_from_action(action.clone());
+            let limit = extract_limit_from_action(&action);
+            let mut query_result: Vec<Person> = select::list(limit as usize);
+            match conditions {
+                Some(unwraped) => {
+                    query_result = query_result
+                        .into_iter()
+                        .filter(|row| satisfies_where(unwraped.clone(), &row))
+                        .collect()
+                }
+                None => (),
+            }
             return ActionResult {
                 msg: "Selected all people within the filter".to_owned(),
                 rows: query_result,

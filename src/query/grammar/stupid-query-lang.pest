@@ -13,6 +13,7 @@ or = { "or" }
 value = {int | string}
 comparision = { string ~ comparator ~ value }
 comparisionSegment = {operator ~ comparision}
+limitStmt = { "limit" ~ int }
 
 where = { "where" ~ comparision ~ comparisionSegment* }
 
@@ -21,7 +22,7 @@ insertParam = {string ~ "=" ~ string }
 action = { insert | delete | select }
 insert = { "insert" ~ insertParam ~ ("," ~ insertParam)+}
 delete = { "delete" ~ where? }
-select = { "select" ~  where? }
+select = { "select" ~  where? ~ limitStmt? }
 
 stmt = { SOI ~ action ~ EOI }
 
