@@ -18,19 +18,15 @@ pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>>
 pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     let mut limit = 50;
 
-    if action.as_rule() != Rule::limitStmt {
+    let limit_stmt = action.clone().into_inner().nth(1).unwrap();
+
+    if limit_stmt.as_rule() != Rule::limitStmt {
         return limit;
     }
 
-    match action.clone().into_inner().next() {
+    match limit_stmt.clone().into_inner().next() {
         Some(lim) => {
-            limit = lim
-                .into_inner()
-                .next()
-                .unwrap()
-                .as_str()
-                .parse::<u32>()
-                .unwrap();
+            limit = lim.as_str().parse::<u32>().unwrap();
         }
         None => (),
     };
