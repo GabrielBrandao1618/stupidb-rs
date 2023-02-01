@@ -3,19 +3,33 @@ use super::parser::Rule;
 use crate::model::Person;
 use pest::{iterators::Pair, iterators::Pairs};
 
-pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
-    for stmt in action.into_inner() {
-        if stmt.as_rule() == Rule::whereStmt {
-            return Some(stmt.into_inner());
+fn extract_from_pair(rule: Rule, pair: Pair<Rule>) -> Option<Pair<Rule>> {
+    for item in pair.into_inner() {
+        if item.as_rule() == rule {
+            return Some(item);
         }
     }
-    None
+    return None;
+}
+
+pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
+    let where_stmt = extract_from_pair(Rule::whereStmt, action);
+    match where_stmt {
+        None => return None,
+        Some(val) => return Some(val.into_inner()),
+    }
 }
 
 pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     for pair in action.clone().into_inner() {
         if pair.as_rule() == Rule::limitStmt {
-            return pair.into_inner().next().unwrap().as_str().parse::<u32>().unwrap();
+            return pair
+                .into_inner()
+                .next()
+                .unwrap()
+                .as_str()
+                .parse::<u32>()
+                .unwrap();
         }
     }
     return 50;
@@ -62,27 +76,21 @@ pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
     return result;
 }
 fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
-    let comparision_inner = comparision.into_inner();
-    let operator = comparision_inner
-        .clone()
-        .nth(1)
+    let comparision_inner = comparision.clone().into_inner();
+    let operator = extract_from_pair(Rule::comparator, comparision.clone())
         .unwrap()
-        .clone()
         .into_inner()
         .next()
         .unwrap()
         .as_rule();
 
-    let value = comparision_inner
-        .clone()
-        .nth(2)
+    let value = extract_from_pair(Rule::value, comparision.clone())
         .unwrap()
-        .clone()
         .into_inner()
         .next()
         .unwrap();
     // Attribute is the person attribute. example: age or name
-    let attribute = comparision_inner.clone().nth(0).unwrap().clone().as_str();
+    let attribute = extract_from_pair(Rule::string, comparision).unwrap().as_str();
     match attribute {
         "age" => match value.as_rule() {
             Rule::int => {
