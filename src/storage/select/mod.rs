@@ -1,9 +1,13 @@
+use pest::iterators::Pairs;
 use rmp_serde::decode as rmps;
 use std::fs::{self, ReadDir};
 use std::path::Path;
 
 use super::get_base_data_path;
 use crate::model::Person;
+
+use crate::query::conditional_helpers::satisfies_where;
+use crate::query::Rule;
 
 fn get_dir_files() -> Option<ReadDir> {
     let str_path = get_base_data_path();
@@ -15,7 +19,7 @@ fn get_dir_files() -> Option<ReadDir> {
     None
 }
 
-pub fn list(quantity: usize) -> Vec<Person> {
+pub fn list(quantity: usize, conditions: Option<Pairs<Rule>>) -> Vec<Person> {
     let files = get_dir_files();
 
     match files {
@@ -30,6 +34,12 @@ pub fn list(quantity: usize) -> Vec<Person> {
                     let file = fs::File::open(path).unwrap();
                     let decoded: Person = rmps::from_read(file).unwrap();
                     decoded
+                })
+                .filter(|row| {
+                    match conditions.clone() {
+                        Some(val) => satisfies_where(val, row),
+                        None => true
+                    }
                 })
                 .take(quantity)
                 .collect();

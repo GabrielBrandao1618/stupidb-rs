@@ -1,4 +1,4 @@
-use super::{Rule, StupidQueryLangParser,insert_helpers::extract_insert_params};
+use super::{insert_helpers::extract_insert_params, Rule, StupidQueryLangParser};
 
 use pest::{iterators::Pair, Parser};
 
@@ -42,23 +42,11 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
         Rule::select => {
             let conditions = extract_conditions_from_action(action.clone());
             let limit = extract_limit_from_action(&action);
-            let mut query_result: Vec<Person> = select::list(limit as usize);
-            match conditions {
-                Some(unwraped) => {
-                    query_result = query_result
-                        .into_iter()
-                        .filter(|row| {
-                            return satisfies_where(unwraped.clone(), row);
-                        })
-                        .collect()
-                }
-                None => (),
-            }
-            let output = ActionResult {
+            let query_result: Vec<Person> = select::list(limit as usize, conditions);
+            return ActionResult {
                 msg: "Selected all people within the filter".to_owned(),
                 rows: query_result,
             };
-            return output;
         }
         Rule::insert => {
             let (name, age) = extract_insert_params(action);

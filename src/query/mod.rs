@@ -1,4 +1,4 @@
-mod conditional_helpers;
+pub mod conditional_helpers;
 mod insert_helpers;
 pub mod parser;
 
