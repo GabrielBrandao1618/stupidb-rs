@@ -6,57 +6,46 @@ Uma CLI simples para armazenar dados de pessoas
 
 É importante ressaltar que o projeto foi criado para fins didáticos, portanto não se trata de uma ferramenta que deve ser usada para algum propósito real.
 
-Ao executar sem quaisquer parâmetros, o programa irá listar todos os comandos disponívels, sendo eles:
-
-* [Push](#push)
-* [List](#list)
-* [Get](#get)
-* [Remove](#remove)
-* [Clear](#clear)
-
-### Push
-
-Armazena um novo registro, para isso, requer os parâmetros nome e idade, que devem ser passados nesta exata ordem. Exemplo:
-```bash
-./stupidb-rs push Gabriel 18
-```
-Todos os registros são criados em uma pasta oculta `.data`
-
-### List
-
-Lista todos os registros gravados. Exemplo de comando:
+Para utilizar um comando, basta chamar o executável passando uma string com algum comando SQL(stupid query language)
 
 ```bash
-./stupidb-rs list
+stupidb-rs "select where age > 17"
 ```
-Por padrão, o comando irá listar apenas 50 registros, é possível mudar isso ao utilizar a flag `--limit`:
+
+Os comandos principais são os listados à seguir:
+
+* [Select](#select)
+* [Insert](#insert)
+* [Delete](#delete)
+
+### Select
+
+Lista registros gravados
 ```bash
-./stupidb-rs list --limit 1
+stupidb-rs "select"
 ```
-
-A função de listagem também conta com filtros de idade, basta utiliza-los através das flags `--min-age` e `--max-age`:
+Por padrão lista apenas 50, mas isso pode ser mudado ao passar o parâmetro `limit`:
 ```bash
-./stupidb-rs list --max-age 20 --min-age 10
+stupidb-rs "select limit 200"
 ```
 
-### Get
-
-Tem uma finalidade parecida com o list, mas serve para retornar apenas o registro de determinado id. Exemplo:
+Também é possível utilizar filtros com o parâmetro `where`:
 ```bash
-./stupidb-rs get ec078509-4b76-4df7-9b22-dbfb53e61d74
+stupidb-rs "select where age > 18"
 ```
 
-### Remove
+### Insert
 
-Remove um registro de acordo com algum parâmetro, até dado momento, apenas o id é aceito. O comando pode ser executado da seguinte forma:
+Cria um novo registro recebendo nome e idade:
+
 ```bash
-./stupidb-rs remove id ec078509-4b76-4df7-9b22-dbfb53e61d74
+stupidb-rs "insert name=Gabriel, age=18"
 ```
-Dessa forma, o registro com o id acima será removido
 
-### Clear
+### Delete
 
-Limpa todos os dados e apaga completamente a pasta `.data`. Não requer nenhum parâmetro, então é tão simples como:
+Deleta registros
 ```bash
-./stupidb-rs clear
+stupidb-rs "delete where age = 14"
 ```
+Sim, caso seja executado sem o parâmetro where, todos os registros são apagados

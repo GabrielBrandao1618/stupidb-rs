@@ -1,0 +1,29 @@
+string = @{ (ASCII_ALPHANUMERIC)+ }
+int = { ASCII_DIGIT+ }
+
+comparator = { equals | greater | minor }
+equals = { "=" }
+greater = { ">" }
+minor = { "<" }
+
+operator = { and | or }
+and = { "and" }
+or = { "or" }
+
+value = {int | string}
+comparision = { string ~ comparator ~ value }
+comparisionSegment = {operator ~ comparision}
+limitStmt = { "limit" ~ int }
+
+whereStmt = { "where" ~ comparision ~ comparisionSegment* }
+
+insertParam = {string ~ "=" ~ value }
+
+action = { insert | delete | select }
+insert = { "insert" ~ insertParam ~ ("," ~ insertParam)+}
+delete = { "delete" ~ whereStmt? }
+select = { "select" ~  whereStmt? ~ limitStmt? }
+
+stmt = { SOI ~ action ~ EOI }
+
+WHITESPACE = _{ " " | "\t" }
