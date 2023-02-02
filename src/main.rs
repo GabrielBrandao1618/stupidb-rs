@@ -15,6 +15,6 @@ fn main() {
     let result = parse(&args.command);
 
     for row in result.rows {
-        println!("{}", row.name);
+        println!("{}: name: {}, age: {}", row.id, row.name, row.age);
     }
 }

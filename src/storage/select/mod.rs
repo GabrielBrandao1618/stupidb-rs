@@ -19,7 +19,7 @@ fn get_dir_files() -> Option<ReadDir> {
     None
 }
 
-pub fn list(quantity: usize, conditions: Option<Pairs<Rule>>) -> Vec<Person> {
+pub fn list(quantity: Option<usize>, conditions: Option<Pairs<Rule>>) -> Vec<Person> {
     let files = get_dir_files();
 
     match files {
@@ -27,7 +27,7 @@ pub fn list(quantity: usize, conditions: Option<Pairs<Rule>>) -> Vec<Person> {
             return vec![];
         }
         Some(files) => {
-            let result: Vec<Person> = files
+            let mut result: Vec<Person> = files
                 .map(|file_path| {
                     let entry = file_path.unwrap();
                     let path = entry.path();
@@ -40,22 +40,13 @@ pub fn list(quantity: usize, conditions: Option<Pairs<Rule>>) -> Vec<Person> {
                         Some(val) => satisfies_where(val, row),
                         None => true
                     }
-                })
-                .take(quantity)
-                .collect();
+                }).collect();
+                match quantity {
+                    Some(val) => result = result.into_iter().take(val).collect(),
+                    None => ()
+                }
+
             return result;
         }
     }
-}
-
-pub fn get_by_key(key: &str) -> Option<Person> {
-    let mut str_path = get_base_data_path();
-    str_path.push_str(key);
-    let path = Path::new(&str_path);
-    if path.exists() {
-        let file = fs::File::open(path).unwrap();
-        let decoded: Person = rmps::from_read(file).unwrap();
-        return Some(decoded);
-    }
-    None
 }

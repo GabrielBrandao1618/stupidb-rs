@@ -4,8 +4,9 @@ use pest::{iterators::Pair, Parser};
 
 use crate::model::Person;
 use crate::query::conditional_helpers::{
-    extract_conditions_from_action, extract_limit_from_action, satisfies_where,
+    extract_conditions_from_action, extract_limit_from_action,
 };
+use crate::storage::mutate::remove_by_key;
 use crate::storage::{insert, select};
 
 pub struct ActionResult {
@@ -42,7 +43,7 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
         Rule::select => {
             let conditions = extract_conditions_from_action(action.clone());
             let limit = extract_limit_from_action(&action);
-            let query_result: Vec<Person> = select::list(limit as usize, conditions);
+            let query_result: Vec<Person> = select::list(Some(limit as usize), conditions);
             return ActionResult {
                 msg: "Selected all people within the filter".to_owned(),
                 rows: query_result,
@@ -52,7 +53,13 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
             let (name, age) = extract_insert_params(action);
             insert::create_person(name, age as u16);
         }
-        Rule::delete => println!("Performing a delete"),
+        Rule::delete => {
+            let conditions = extract_conditions_from_action(action);
+            let targets: Vec<Person> = select::list(None, conditions);
+            for target in targets {
+                remove_by_key(&target.id);
+            }
+        }
         _ => unreachable!(),
     }
     return ActionResult {
