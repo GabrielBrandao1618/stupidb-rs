@@ -1,8 +1,8 @@
 use pest::iterators::Pair;
 use super::{Rule,extract_many_from_pair};
 
-pub fn extract_insert_params(insert_action: Pair<Rule>) -> (String, u32) {
-    let params = extract_many_from_pair(Rule::insertParam, insert_action);
+pub fn extract_insert_params(insert_action: &Pair<Rule>) -> (String, u32) {
+    let params = extract_many_from_pair(Rule::insertParam, insert_action.clone());
     let mut name = "".to_owned();
     let mut age: u32 = 0;
     for param in params {

@@ -3,8 +3,8 @@ use super::{extract_from_pair, Rule};
 use crate::model::Person;
 use pest::{iterators::Pair, iterators::Pairs};
 
-pub fn extract_conditions_from_action(action: Pair<Rule>) -> Option<Pairs<Rule>> {
-    let where_stmt = extract_from_pair(Rule::whereStmt, action);
+pub fn extract_conditions_from_action<'a>(action: &Pair<'a, Rule>) -> Option<Pairs<'a, Rule>> {
+    let where_stmt = extract_from_pair(Rule::whereStmt, action.clone());
     match where_stmt {
         None => return None,
         Some(val) => return Some(val.into_inner()),
@@ -26,48 +26,56 @@ pub fn extract_limit_from_action(action: &Pair<Rule>) -> u32 {
     return 50;
 }
 
-pub fn satisfies_where(conditions: Pairs<Rule>, person: &Person) -> bool {
-    let mut result = false;
-    for condition in conditions {
-        match condition.as_rule() {
-            Rule::comparision => {
-                let comparision_result = resolve_comparision(condition, person);
-                result = comparision_result;
-            }
-            Rule::comparisionSegment => {
-                let condition_vec = condition.into_inner();
-                // First element is the operator(and/or) and second element is the comparision
-                // itself
-                let condition_val = condition_vec.clone().nth(1).unwrap();
-                let operator = condition_vec
-                    .clone()
-                    .nth(0)
-                    .unwrap()
-                    .into_inner()
-                    .next()
-                    .unwrap();
+pub fn generate_filter_fn<'a>(conditions: Option<&Pairs<'a, Rule>>) -> Box<dyn FnOnce(&Person) -> bool> {
+    return Box::new(move |person| satisfies_where(conditions, person));
+}
 
-                let comparision_result = resolve_comparision(condition_val, person);
-                match operator.as_rule() {
-                    Rule::or => {
-                        result = result || comparision_result;
+pub fn satisfies_where<'a>(conditions: Option<&Pairs<'a, Rule>>, person: &Person) -> bool {
+    let mut result = false;
+    match conditions {
+        None => result = true,
+        Some(val) => {
+            for condition in val.clone() {
+                match condition.as_rule() {
+                    Rule::comparision => {
+                        let comparision_result = resolve_comparision(condition, person);
+                        result = comparision_result;
                     }
-                    Rule::and => {
-                        result = result && comparision_result;
+                    Rule::comparisionSegment => {
+                        let condition_vec = condition.into_inner();
+                        // First element is the operator(and/or) and second element is the comparision
+                        // itself
+                        let condition_val = condition_vec.clone().nth(1).unwrap();
+                        let operator = condition_vec
+                            .clone()
+                            .nth(0)
+                            .unwrap()
+                            .into_inner()
+                            .next()
+                            .unwrap();
+
+                        let comparision_result = resolve_comparision(condition_val, person);
+                        match operator.as_rule() {
+                            Rule::or => {
+                                result = result || comparision_result;
+                            }
+                            Rule::and => {
+                                result = result && comparision_result;
+                            }
+                            _ => println!("Unknown operator: {:#?}", operator.as_rule()),
+                        }
                     }
-                    _ => println!("Unknown operator: {:#?}", operator.as_rule()),
+                    _ => {
+                        println!("Unknown comparision operator {:#?}", condition.as_rule());
+                        return true;
+                    }
                 }
-            }
-            _ => {
-                println!("Unknown comparision operator {:#?}", condition.as_rule());
-                return true;
             }
         }
     }
     return result;
 }
 fn resolve_comparision(comparision: Pair<Rule>, base_value: &Person) -> bool {
-    let comparision_inner = comparision.clone().into_inner();
     let operator = extract_from_pair(Rule::comparator, comparision.clone())
         .unwrap()
         .into_inner()

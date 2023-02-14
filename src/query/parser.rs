@@ -1,3 +1,4 @@
+use super::conditional_helpers::generate_filter_fn;
 use super::{insert_helpers::extract_insert_params, Rule, StupidQueryLangParser};
 
 use pest::{iterators::Pair, Parser};
@@ -14,7 +15,7 @@ pub struct ActionResult {
     pub msg: String,
 }
 
-pub fn parse(input: &str) -> ActionResult {
+pub fn parse<'a>(input: &'a str) -> ActionResult {
     let pairs = StupidQueryLangParser::parse(Rule::stmt, input).unwrap();
     for pair in pairs {
         match pair.as_rule() {
@@ -27,7 +28,7 @@ pub fn parse(input: &str) -> ActionResult {
                     .into_inner()
                     .next()
                     .unwrap();
-                return perform_action(action);
+                return perform_action(&action);
             }
             _ => unreachable!(),
         }
@@ -38,12 +39,15 @@ pub fn parse(input: &str) -> ActionResult {
     };
 }
 
-pub fn perform_action(action: Pair<Rule>) -> ActionResult {
+pub fn perform_action<'a>(action: &Pair<'a, Rule>) -> ActionResult {
+    let conditions = extract_conditions_from_action(&action);
+    let limit = extract_limit_from_action(&action);
+
+    let filter_fn = generate_filter_fn(conditions.as_ref());
     match action.as_rule() {
         Rule::select => {
-            let conditions = extract_conditions_from_action(action.clone());
-            let limit = extract_limit_from_action(&action);
-            let query_result: Vec<Person> = select::list(Some(limit as usize), conditions);
+            let query_result: Vec<Person> =
+                select::list(Some(limit as usize), &Box::new(filter_fn));
             return ActionResult {
                 msg: "Selected all people within the filter".to_owned(),
                 rows: query_result,
@@ -54,8 +58,7 @@ pub fn perform_action(action: Pair<Rule>) -> ActionResult {
             insert::create_person(name, age as u16);
         }
         Rule::delete => {
-            let conditions = extract_conditions_from_action(action);
-            let targets: Vec<Person> = select::list(None, conditions);
+            let targets: Vec<Person> = select::list(None, &Box::new(filter_fn));
             for target in targets {
                 remove_by_key(&target.id);
             }
